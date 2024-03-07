@@ -1,0 +1,5 @@
+app = "spark-evaluate"
+primary_region = "cdg"
+
+[env]
+  SENTRY_ENVIRONMENT = "production"
