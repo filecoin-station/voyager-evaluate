@@ -2,13 +2,10 @@ import { MAX_SCORE, evaluate, runFraudDetection, MAX_SET_SCORES_PARTICIPANTS, cr
 import { Point } from '../lib/telemetry.js'
 import assert from 'node:assert'
 import createDebug from 'debug'
-import { VALID_MEASUREMENT, VALID_TASK, today } from './helpers/test-data.js'
+import { VALID_MEASUREMENT, VALID_TASK } from './helpers/test-data.js'
 import { assertPointFieldValue } from './helpers/assertions.js'
 import { RoundData } from '../lib/round.js'
-import { DATABASE_URL } from '../lib/config.js'
-import pg from 'pg'
 import { beforeEach } from 'mocha'
-import { migrateWithPgClient } from '../lib/migrate.js'
 
 const debug = createDebug('test')
 const logger = { log: debug, error: debug }
@@ -22,27 +19,7 @@ const recordTelemetry = (measurementName, fn) => {
 }
 beforeEach(() => telemetry.splice(0))
 
-const createPgClient = async () => {
-  const pgClient = new pg.Client({ connectionString: DATABASE_URL })
-  await pgClient.connect()
-  return pgClient
-}
-
 describe('evaluate', () => {
-  let pgClient
-  before(async () => {
-    pgClient = await createPgClient()
-    await migrateWithPgClient(pgClient)
-  })
-
-  beforeEach(async () => {
-    await pgClient.query('DELETE FROM retrieval_stats')
-  })
-
-  after(async () => {
-    await pgClient.end()
-  })
-
   it('evaluates measurements', async () => {
     const round = new RoundData(0)
     for (let i = 0; i < 10; i++) {
@@ -65,7 +42,6 @@ describe('evaluate', () => {
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
-      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -82,13 +58,6 @@ describe('evaluate', () => {
       `No telemetry point "evaluate" was recorded. Actual points: ${JSON.stringify(telemetry.map(p => p.name))}`)
     assertPointFieldValue(point, 'total_nodes', '1i')
     // TODO: assert more point fields
-
-    const { rows: publicStats } = await pgClient.query('SELECT * FROM retrieval_stats')
-    assert.deepStrictEqual(publicStats, [{
-      day: today(),
-      total: 1,
-      successful: 1
-    }])
   })
 
   it('handles empty rounds', async () => {
@@ -110,7 +79,6 @@ describe('evaluate', () => {
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
-      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -162,7 +130,6 @@ describe('evaluate', () => {
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
-      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -183,9 +150,7 @@ describe('evaluate', () => {
         ...VALID_MEASUREMENT,
         inet_group: 'group3',
         // invalid task
-        cid: 'bafyreicnokmhmrnlp2wjhyk2haep4tqxiptwfrp2rrs7rzq7uk766chqvq',
-        provider_address: '/dns4/production-ipfs-peer.pinata.cloud/tcp/3000/ws/p2p/Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn',
-        protocol: 'bitswap'
+        cid: 'bafyreicnokmhmrnlp2wjhyk2haep4tqxiptwfrp2rrs7rzq7uk766chqvq'
       })
     }
     const setScoresCalls = []
@@ -205,7 +170,6 @@ describe('evaluate', () => {
       ieContractWithSigner,
       recordTelemetry,
       fetchRoundDetails,
-      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -254,7 +218,6 @@ describe('evaluate', () => {
       ieContractWithSigner,
       recordTelemetry,
       fetchRoundDetails,
-      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -274,8 +237,6 @@ describe('evaluate', () => {
         inet_group: 'group3',
         // invalid task
         cid: 'bafyreicnokmhmrnlp2wjhyk2haep4tqxiptwfrp2rrs7rzq7uk766chqvq',
-        provider_address: '/dns4/production-ipfs-peer.pinata.cloud/tcp/3000/ws/p2p/Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn',
-        protocol: 'bitswap',
         retrievalResult: 'TIMEOUT'
       })
     }
@@ -296,7 +257,6 @@ describe('evaluate', () => {
       ieContractWithSigner,
       recordTelemetry,
       fetchRoundDetails,
-      createPgClient,
       logger
     })
 
@@ -318,13 +278,12 @@ describe('evaluate', () => {
 
 describe('fraud detection', () => {
   it('checks if measurements are for a valid task', async () => {
-    const sparkRoundDetails = {
+    const voyagerRoundDetails = {
       roundId: 1234, // doesn't matter
       retrievalTasks: [
         {
           cid: 'QmUuEoBdjC8D1PfWZCc7JCSK8nj7TV6HbXWDHYHzZHCVGS',
-          providerAddress: '/dns4/production-ipfs-peer.pinata.cloud/tcp/3000/ws/p2p/Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn',
-          protocol: 'bitswap'
+          providerAddress: '/dns4/production-ipfs-peer.pinata.cloud/tcp/3000/ws/p2p/Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn'
         }
       ]
     }
@@ -333,20 +292,16 @@ describe('fraud detection', () => {
       {
         ...VALID_MEASUREMENT,
         // valid task
-        cid: 'QmUuEoBdjC8D1PfWZCc7JCSK8nj7TV6HbXWDHYHzZHCVGS',
-        provider_address: '/dns4/production-ipfs-peer.pinata.cloud/tcp/3000/ws/p2p/Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn',
-        protocol: 'bitswap'
+        cid: 'QmUuEoBdjC8D1PfWZCc7JCSK8nj7TV6HbXWDHYHzZHCVGS'
       },
       {
         ...VALID_MEASUREMENT,
         // invalid task
-        cid: 'bafyreicnokmhmrnlp2wjhyk2haep4tqxiptwfrp2rrs7rzq7uk766chqvq',
-        provider_address: '/dns4/production-ipfs-peer.pinata.cloud/tcp/3000/ws/p2p/Qma8ddFEQWEU8ijWvdxXm3nxU7oHsRtCykAaVz8WUYhiKn',
-        protocol: 'bitswap'
+        cid: 'bafyreicnokmhmrnlp2wjhyk2haep4tqxiptwfrp2rrs7rzq7uk766chqvq'
       }
     ]
 
-    await runFraudDetection(1, measurements, sparkRoundDetails)
+    await runFraudDetection(1, measurements, voyagerRoundDetails)
     assert.deepStrictEqual(
       measurements.map(m => m.fraudAssessment),
       ['OK', 'INVALID_TASK']
@@ -354,13 +309,13 @@ describe('fraud detection', () => {
   })
 
   it('rejects redundant measurements from the same inet group', async () => {
-    const sparkRoundDetails = { roundId: 1234, retrievalTasks: [VALID_TASK] }
+    const voyagerRoundDetails = { roundId: 1234, retrievalTasks: [VALID_TASK] }
     const measurements = [
       { ...VALID_MEASUREMENT },
       { ...VALID_MEASUREMENT }
     ]
 
-    const stats = await runFraudDetection(1, measurements, sparkRoundDetails)
+    const stats = await runFraudDetection(1, measurements, voyagerRoundDetails)
     assert.deepStrictEqual(
       measurements.map(m => m.fraudAssessment),
       ['OK', 'DUP_INET_GROUP']
@@ -378,7 +333,7 @@ describe('fraud detection', () => {
     // We have two participants in the same inet group
     // They both complete the same valid tasks
     // Ideally, our algorithm should assign one reward to each one
-    const sparkRoundDetails = {
+    const voyagerRoundDetails = {
       roundId: 1234,
       retrievalTasks: [
         { ...VALID_TASK, cid: 'cid1' },
@@ -399,7 +354,7 @@ describe('fraud detection', () => {
     }
     const measurements = []
     for (const participantAddress of Object.keys(timestamps)) {
-      for (const task of sparkRoundDetails.retrievalTasks) {
+      for (const task of voyagerRoundDetails.retrievalTasks) {
         measurements.push({
           ...VALID_MEASUREMENT,
           ...task,
@@ -410,7 +365,7 @@ describe('fraud detection', () => {
       }
     }
 
-    const stats = await runFraudDetection(1, measurements, sparkRoundDetails)
+    const stats = await runFraudDetection(1, measurements, voyagerRoundDetails)
     assert.deepStrictEqual(
       measurements.map(m => `${m.participantAddress}::${m.fraudAssessment}`),
       [
@@ -432,7 +387,7 @@ describe('fraud detection', () => {
   it('calculates aggregate stats of participant group-winning rate', async () => {
     // Let's create three different tasks and three participants where two share the same inet group.
     // All three participants measure all three tasks.
-    const sparkRoundDetails = {
+    const voyagerRoundDetails = {
       roundId: 1234,
       retrievalTasks: [
         { ...VALID_TASK, cid: 'cid1' },
@@ -471,7 +426,7 @@ describe('fraud detection', () => {
 
     // eslint-disable-next-line camelcase
     for (const [participantAddress, inet_group] of Object.entries(participantSubnets)) {
-      for (const task of sparkRoundDetails.retrievalTasks) {
+      for (const task of voyagerRoundDetails.retrievalTasks) {
         measurements.push({
           ...VALID_MEASUREMENT,
           ...task,
@@ -483,7 +438,7 @@ describe('fraud detection', () => {
       }
     }
 
-    const stats = await runFraudDetection(1, measurements, sparkRoundDetails)
+    const stats = await runFraudDetection(1, measurements, voyagerRoundDetails)
     assert.deepStrictEqual(
       measurements.map(m => `${m.participantAddress}::${m.fraudAssessment}`),
       [
@@ -510,7 +465,7 @@ describe('fraud detection', () => {
   })
 
   it('rejects measurements above maxTasksPerNode', async () => {
-    const sparkRoundDetails = {
+    const voyagerRoundDetails = {
       roundId: 1234,
       retrievalTasks: [
         {
@@ -543,40 +498,10 @@ describe('fraud detection', () => {
       }
     ]
 
-    await runFraudDetection(1, measurements, sparkRoundDetails)
+    await runFraudDetection(1, measurements, voyagerRoundDetails)
     assert.deepStrictEqual(
       measurements.map(m => m.fraudAssessment),
       ['OK', 'TOO_MANY_TASKS', 'OK']
-    )
-  })
-
-  it('rejects measurements missing indexer result', async () => {
-    const sparkRoundDetails = {
-      roundId: 1234, // doesn't matter
-      retrievalTasks: [
-        {
-          cid: VALID_MEASUREMENT.cid
-        }
-      ]
-    }
-
-    const measurements = [
-      {
-        ...VALID_MEASUREMENT,
-        inet_group: 'group1',
-        indexerResult: 'OK'
-      },
-      {
-        ...VALID_MEASUREMENT,
-        inet_group: 'group2',
-        indexerResult: undefined
-      }
-    ]
-
-    await runFraudDetection(1, measurements, sparkRoundDetails)
-    assert.deepStrictEqual(
-      measurements.map(m => m.fraudAssessment),
-      ['OK', 'IPNI_NOT_QUERIED']
     )
   })
 })

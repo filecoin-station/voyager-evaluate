@@ -5,15 +5,15 @@ Usage:
   ([docs](https://fly.io/docs/postgres/connecting/connecting-with-flyctl/)). Remember to use a
   different port if you have a local Postgres server for development!
    ```sh
-   fly proxy 5454:5432 -a spark-db
+   fly proxy 5454:5432 -a voyager-db
    ```
 
 2. Run the following command to fetch all unique participant addresses.
 
-   Replace "auth" with the auth from the `spark-db` connection string stored in 1Password.
+   Replace "auth" with the auth from the `voyager-db` connection string stored in 1Password.
 
    ```sh
-   DATABASE_URL="postgres://auth@localhost:5454/spark" node bin/get-unique-measurement-values.js participant_address <range-start> <range-end>
+   DATABASE_URL="postgres://auth@localhost:5454/voyager" node bin/get-unique-measurement-values.js participant_address <range-start> <range-end>
    ```
 
    This will get all unique participant addresses committed between range-start (inclusive) and range-end (exclusive).

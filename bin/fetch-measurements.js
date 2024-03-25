@@ -5,16 +5,16 @@ Usage:
   ([docs](https://fly.io/docs/postgres/connecting/connecting-with-flyctl/)). Remember to use a
   different port if you have a local Postgres server for development!
    ```sh
-   fly proxy 5454:5432 -a spark-db
+   fly proxy 5454:5432 -a voyager-db
    ```
 
-2. Find spark-db entry in 1Password and get the user and password from the connection string.
+2. Find voyager-db entry in 1Password and get the user and password from the connection string.
 
 3. Run the following command to fetch all measurements, remember to replace "user" and "password"
    with the real credentials:
 
    ```sh
-   DATABASE_URL="postgres://user:password@localhost:5454/spark" node bin/fetch-measurements.js <range-start> <range-end> > measurements.ndjson
+   DATABASE_URL="postgres://user:password@localhost:5454/voyager-api" node bin/fetch-measurements.js <range-start> <range-end> > measurements.ndjson
    ```
 
    This will fetch all measurements committed between range-start (inclusive) and range-end (exclusive)

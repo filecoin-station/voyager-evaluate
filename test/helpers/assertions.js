@@ -6,7 +6,7 @@ import assert from 'node:assert'
 export const assertRecordedTelemetryPoint = (recordings, name) => {
   const point = recordings.find(p => p.name === name)
   assert(!!point,
-    `No telemetry point "spark_version" was recorded. Actual points: ${JSON.stringify(recordings.map(p => p.name))}`)
+    `No telemetry point "${name}" was recorded. Actual points: ${JSON.stringify(recordings.map(p => p.name))}`)
   return point
 }
 

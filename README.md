@@ -1,33 +1,8 @@
-# spark-evaluate
+# voyager-evaluate
 Evaluate service
 
 - [Meridian spec](https://www.notion.so/pl-strflt/Meridian-Design-Doc-07-Flexible-preprocessing-1b8f2f19ca7d4fd4b74a1e57e7d7ef8a?pvs=4)
 - [Meridian evaluate service](https://github.com/Meridian-IE/evaluate-service)
-
-## Development
-
-Set up [PostgreSQL](https://www.postgresql.org/) with default settings:
- - Port: 5432
- - User: _your system user name_
- - Password: _blank_
- - Database: spark_stats
-
-Alternatively, set the environment variable `$DATABASE_URL` with
-`postgres://${USER}:${PASS}@${HOST}:${POST}/${DATABASE}`.
-
-The Postgres user and database need to exist already, and the user
-needs full management permissions for the database.
-
-You can also run the following command to set up the PostgreSQL server via Docker:
-
-```bash
-docker run -d --name spark-db \
-  -e POSTGRES_HOST_AUTH_METHOD=trust \
-  -e POSTGRES_USER=$USER \
-  -e POSTGRES_DB=spark_stats \
-  -p 5432:5432 \
-  postgres
-```
 
 ## Run the tests
 

@@ -1,12 +1,12 @@
 {
   "type": "module",
   "scripts": {
-    "migrate": "node bin/migrate.js",
-    "start": "node bin/spark-evaluate.js",
+    "start": "node bin/voyager-evaluate.js",
     "test": "standard && mocha"
   },
   "devDependencies": {
     "mocha": "^10.3.0",
+    "pg": "^8.11.3",
     "standard": "^17.1.0"
   },
   "dependencies": {
@@ -21,9 +21,7 @@
     "ipfs-unixfs-exporter": "^13.5.0",
     "just-percentile": "^4.2.0",
     "on-contract-event": "^1.0.1",
-    "p-retry": "^6.2.0",
-    "pg": "^8.11.3",
-    "postgrator": "^7.2.0"
+    "p-retry": "^6.2.0"
   },
   "standard": {
     "env": [

@@ -1,7 +1,7 @@
 import { IE_CONTRACT_ADDRESS, RPC_URL, rpcHeaders } from '../lib/config.js'
 import { evaluate } from '../lib/evaluate.js'
 import { preprocess, fetchMeasurements } from '../lib/preprocess.js'
-import { fetchRoundDetails } from '../lib/spark-api.js'
+import { fetchRoundDetails } from '../lib/voyager-api.js'
 import { Point } from '../lib/telemetry.js'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import path from 'node:path'
@@ -101,14 +101,7 @@ await evaluate({
   fetchRoundDetails,
   ieContractWithSigner,
   logger: console,
-  recordTelemetry,
-
-  // We don't want dry runs to update data in `sparks_stats`, therefore we are passing a stub
-  // connection factory that creates no-op clients. This also keeps the setup simpler. The person
-  // executing a dry run does not need access to any Postgres instance.
-  // Evaluate uses the PG client only for updating the statistics, it's not reading any data.
-  // Thus it's safe to inject a no-op client.
-  createPgClient: createNoopPgClient
+  recordTelemetry
 })
 
 console.log(process.memoryUsage())
@@ -155,7 +148,7 @@ async function fetchMeasurementsAddedFromChain (roundIndex) {
   // See https://github.com/Meridian-IE/impact-evaluator/issues/57
 
   // max look-back period allowed by Glif.io is 2000 blocks (approx 16h40m)
-  // SPARK round is ~60 minutes, i.e. ~120 blocks
+  // voyager round is ~60 minutes, i.e. ~120 blocks
   const rawEvents = await ieContract.queryFilter('MeasurementsAdded', blockNumber - 1800, 'latest')
 
   /** @type {Array<{ cid: string, roundIndex: bigint, sender: string }>} */
@@ -183,15 +176,4 @@ async function fetchMeasurementsAddedFromChain (roundIndex) {
   }
 
   return events.filter(e => e.roundIndex === roundIndex).map(e => e.cid)
-}
-
-function createNoopPgClient () {
-  return {
-    async query () {
-      return { rows: [] }
-    },
-    async end () {
-      // no-op
-    }
-  }
 }

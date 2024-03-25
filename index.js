@@ -1,4 +1,3 @@
-import assert from 'node:assert'
 import * as Sentry from '@sentry/node'
 import { preprocess } from './lib/preprocess.js'
 import { evaluate } from './lib/evaluate.js'
@@ -14,11 +13,8 @@ export const startEvaluate = async ({
   fetchMeasurements,
   fetchRoundDetails,
   recordTelemetry,
-  createPgClient,
   logger
 }) => {
-  assert(typeof createPgClient === 'function', 'createPgClient must be a function')
-
   const rounds = {
     current: null,
     previous: null
@@ -91,7 +87,6 @@ export const startEvaluate = async ({
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
-      createPgClient,
       logger
     }).catch(err => {
       console.error(err)

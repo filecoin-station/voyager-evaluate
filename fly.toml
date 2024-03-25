@@ -1,4 +1,4 @@
-app = "spark-evaluate"
+app = "voyager-evaluate"
 primary_region = "cdg"
 
 [env]

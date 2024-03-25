@@ -1,65 +1,43 @@
-import createDebug from 'debug'
-import { beforeEach } from 'mocha'
-import assert from 'node:assert'
-import pg from 'pg'
-import { DATABASE_URL } from '../lib/config.js'
-import { evaluate } from '../lib/evaluate.js'
-import { migrateWithPgClient } from '../lib/migrate.js'
-import { fetchMeasurements, preprocess } from '../lib/preprocess.js'
-import { RoundData } from '../lib/round.js'
-import { fetchRoundDetails } from '../lib/spark-api.js'
-import { Point } from '../lib/telemetry.js'
-import { assertRecordedTelemetryPoint } from './helpers/assertions.js'
+// import createDebug from 'debug'
+// import { beforeEach } from 'mocha'
+// import assert from 'node:assert'
+// import { evaluate } from '../lib/evaluate.js'
+// import { fetchMeasurements, preprocess } from '../lib/preprocess.js'
+// import { RoundData } from '../lib/round.js'
+// import { fetchRoundDetails } from '../lib/voyager-api.js'
+// import { Point } from '../lib/telemetry.js'
+// import { assertRecordedTelemetryPoint } from './helpers/assertions.js'
 
-const debug = createDebug('test')
+// const debug = createDebug('test')
 
-const logger = { log: debug, error: console.error }
+// const logger = { log: debug, error: console.error }
 
-const telemetry = []
-const recordTelemetry = (measurementName, fn) => {
-  const point = new Point(measurementName)
-  fn(point)
-  debug('recordTelemetry(%s): %o', measurementName, point.fields)
-  telemetry.push(point)
-}
-beforeEach(() => telemetry.splice(0))
+// const telemetry = []
+// const recordTelemetry = (measurementName, fn) => {
+//   const point = new Point(measurementName)
+//   fn(point)
+//   debug('recordTelemetry(%s): %o', measurementName, point.fields)
+//   telemetry.push(point)
+// }
+// beforeEach(() => telemetry.splice(0))
 
-const createIeContractWithSigner = (contractAddress) => ({
-  participantAddresses: null,
-  scores: null,
+// const createIeContractWithSigner = (contractAddress) => ({
+//   participantAddresses: null,
+//   scores: null,
 
-  async getAddress () {
-    return contractAddress
-  },
-  async setScores (_roundIndex, participantAddresses, scores) {
-    this.participantAddresses = participantAddresses
-    this.scores = scores
-    return { hash: '0x234' }
-  }
-})
-
-const createPgClient = async () => {
-  const pgClient = new pg.Client({ connectionString: DATABASE_URL })
-  await pgClient.connect()
-  return pgClient
-}
+//   async getAddress () {
+//     return contractAddress
+//   },
+//   async setScores (_roundIndex, participantAddresses, scores) {
+//     this.participantAddresses = participantAddresses
+//     this.scores = scores
+//     return { hash: '0x234' }
+//   }
+// })
 
 describe('preprocess-evaluate integration', () => {
-  let pgClient
-  before(async () => {
-    pgClient = await createPgClient()
-    await migrateWithPgClient(pgClient)
-  })
-
-  beforeEach(async () => {
-    await pgClient.query('DELETE FROM retrieval_stats')
-  })
-
-  after(async () => {
-    await pgClient.end()
-  })
-
-  it('produces expected results', async function () {
+  // TODO: Need existing round with measurements
+  it('produces expected results' /*, async function () {
     this.timeout(10000)
 
     // These three constants must correspond to a real round
@@ -79,7 +57,6 @@ describe('preprocess-evaluate integration', () => {
 
     const ieContractWithSigner = createIeContractWithSigner(MERIDIAN_VERSION)
     await evaluate({
-      createPgClient,
       fetchRoundDetails,
       ieContractWithSigner,
       logger,
@@ -93,7 +70,6 @@ describe('preprocess-evaluate integration', () => {
 
     assert.deepStrictEqual(telemetry.map(p => p.name), [
       'preprocess',
-      'spark_versions',
       'fetch_tasks_for_round',
       'evaluate',
       'retrieval_stats_honest',
@@ -166,7 +142,6 @@ describe('preprocess-evaluate integration', () => {
       car_size_p90: '275i',
       car_size_p95: '389i',
       car_size_p99: '1452i',
-      download_bandwidth: '62891i',
       duration_max: '30992i',
       duration_mean: '3498i',
       duration_min: '107i',
@@ -177,16 +152,11 @@ describe('preprocess-evaluate integration', () => {
       duration_p90: '5135i',
       duration_p95: '30222i',
       duration_p99: '30424i',
-      indexer_rate_ERROR_404: '0.8329562594268477',
-      indexer_rate_ERROR_FETCH: '0.0007541478129713424',
-      indexer_rate_HTTP_NOT_ADVERTISED: '0.1151332327802916',
-      indexer_rate_OK: '0.05115635997988939',
       inet_groups: '967i',
       measurements: '7956i',
       participants: '2067i',
       rate_of_deals_advertising_http: '0.054',
       result_rate_BAD_GATEWAY: '0.017722473604826545',
-      result_rate_CAR_TOO_LARGE: '0',
       result_rate_GATEWAY_TIMEOUT: '0',
       result_rate_IPNI_ERROR_404: '0.8329562594268477',
       result_rate_IPNI_ERROR_FETCH: '0.0007541478129713424',
@@ -205,16 +175,6 @@ describe('preprocess-evaluate integration', () => {
       tasks_per_node_p90: '2i',
       tasks_per_node_p95: '2i',
       tasks_per_node_p99: '3i',
-      ttfb_max: '16029i',
-      ttfb_mean: '1286i',
-      ttfb_min: '107i',
-      ttfb_p1: '171i',
-      ttfb_p10: '427i',
-      ttfb_p5: '285i',
-      ttfb_p50: '781i',
-      ttfb_p90: '2257i',
-      ttfb_p95: '2915i',
-      ttfb_p99: '7537i',
       unique_tasks: '1000i'
     })
 
@@ -230,7 +190,6 @@ describe('preprocess-evaluate integration', () => {
       car_size_p90: '275i',
       car_size_p95: '389i',
       car_size_p99: '1452i',
-      download_bandwidth: '64975i',
       duration_max: '32372i',
       duration_mean: '11620i',
       duration_min: '107i',
@@ -241,17 +200,11 @@ describe('preprocess-evaluate integration', () => {
       duration_p90: '30246i',
       duration_p95: '30370i',
       duration_p99: '30858i',
-      indexer_rate_ERROR_404: '0.45251937984496127',
-      indexer_rate_ERROR_FETCH: '0.00045219638242894054',
-      indexer_rate_HTTP_NOT_ADVERTISED: '0.06291989664082687',
-      indexer_rate_OK: '0.03972868217054264',
-      indexer_rate_UNDEFINED: '0.44437984496124033',
       inet_groups: '1386i',
       measurements: '15480i',
       participants: '2076i',
       rate_of_deals_advertising_http: '0.09714285714285714',
       result_rate_BAD_GATEWAY: '0.021640826873385012',
-      result_rate_CAR_TOO_LARGE: '0',
       result_rate_GATEWAY_TIMEOUT: '0',
       result_rate_IPNI_ERROR_404: '0.45251937984496127',
       result_rate_IPNI_ERROR_FETCH: '0.00045219638242894054',
@@ -271,16 +224,6 @@ describe('preprocess-evaluate integration', () => {
       tasks_per_node_p90: '3i',
       tasks_per_node_p95: '4i',
       tasks_per_node_p99: '11i',
-      ttfb_max: '16029i',
-      ttfb_mean: '1295i',
-      ttfb_min: '107i',
-      ttfb_p1: '171i',
-      ttfb_p10: '469i',
-      ttfb_p5: '285i',
-      ttfb_p50: '779i',
-      ttfb_p90: '2314i',
-      ttfb_p95: '3011i',
-      ttfb_p99: '7487i',
       unique_tasks: '1997i'
 
     })
@@ -380,5 +323,5 @@ describe('preprocess-evaluate integration', () => {
       125691302161n,
       125691302161n
     ])
-  })
+  } */)
 })
