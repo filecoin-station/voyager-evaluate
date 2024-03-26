@@ -21,10 +21,10 @@ describe('voyager-api client', () => {
     assert.strictEqual(retrievalTasks.length, 1000)
     assert.deepStrictEqual(retrievalTasks.slice(0, 2), [
       {
-        cid: '/ipfs/QmWT2u6UEeXJs5MWcSTQhHFyYC9wKevQNjXC4J3k67ymtQ/318.json,7779'
+        cid: '/ipfs/QmPVCuANEXcuaPeL4BRmEtW6ER4Y9pDgq9h6p4mVMTPkjb?format=car,3131'
       },
       {
-        cid: '/ipfs/QmSyQVF28YytFN848yXG69PqJ9u7F2FgTLpmyKsANdvd5s?key=a528ff1fe27c009e970caab8a346de4e&redirect=https%3A%2F%2Fwww.amazon.com%2F&format=car,2338'
+        cid: '/ipfs/QmRYoNskukBNN6LsR92cV4LazUJwwCkqs7tDJAKHfyFtCA/841,1573'
       }
     ])
   })
