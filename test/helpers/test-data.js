@@ -12,7 +12,7 @@ export const VALID_MEASUREMENT = {
   participantAddress: VALID_PARTICIPANT_ADDRESS,
   inet_group: 'some-group-id',
   status_code: 200,
-  timeout: false,
+  car_too_large: false,
   end_at: new Date('2023-11-01T09:00:02.000Z').getTime(),
   finished_at: new Date('2023-11-01T09:00:10.000Z').getTime(),
   retrievalResult: 'OK'

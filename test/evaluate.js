@@ -237,7 +237,7 @@ describe('evaluate', () => {
         inet_group: 'group3',
         // invalid task
         cid: 'bafyreicnokmhmrnlp2wjhyk2haep4tqxiptwfrp2rrs7rzq7uk766chqvq',
-        retrievalResult: 'TIMEOUT'
+        retrievalResult: 'CAR_TOO_LARGE'
       })
     }
     const setScoresCalls = []

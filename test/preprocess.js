@@ -68,7 +68,7 @@ describe('getRetrievalResult', () => {
     id: 11009569,
     zinnia_version: '0.14.0',
     participant_address: 'f410fgkhpcrbmdvic52o3nivftrjxr7nzw47updmuzra',
-    timeout: false,
+    car_too_large: false,
     status_code: 200,
     end_at: '1970-01-01T00:00:00.000Z',
     inet_group: 'ue49TX_JdYjI',
@@ -82,12 +82,12 @@ describe('getRetrievalResult', () => {
     assert.strictEqual(result, 'OK')
   })
 
-  it('TIMEOUT', () => {
+  it('CAR_TOO_LARGE', () => {
     const result = getRetrievalResult({
       ...SUCCESSFUL_RETRIEVAL,
-      timeout: true
+      car_too_large: true
     })
-    assert.strictEqual(result, 'TIMEOUT')
+    assert.strictEqual(result, 'CAR_TOO_LARGE')
   })
 
   it('BAD_GATEWAY', () => {
@@ -133,7 +133,7 @@ describe('getRetrievalResult', () => {
   it('UNKNOWN_ERROR - status_code is null', () => {
     const result = getRetrievalResult({
       ...SUCCESSFUL_RETRIEVAL,
-      timeout: false,
+      car_too_large: false,
       status_code: null
     })
     assert.strictEqual(result, 'UNKNOWN_ERROR')

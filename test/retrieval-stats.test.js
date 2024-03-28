@@ -19,8 +19,8 @@ describe('retrieval statistics', () => {
       },
       {
         ...VALID_MEASUREMENT,
-        timeout: true,
-        retrievalResult: 'TIMEOUT',
+        car_too_large: true,
+        retrievalResult: 'CAR_TOO_LARGE',
 
         end_at: new Date('2023-11-01T09:00:50.000Z').getTime(),
         finished_at: new Date('2023-11-01T09:00:30.000Z').getTime()
@@ -50,7 +50,7 @@ describe('retrieval statistics', () => {
     assertPointFieldValue(point, 'inet_groups', '2i')
 
     assertPointFieldValue(point, 'result_rate_OK', '0.3333333333333333')
-    assertPointFieldValue(point, 'result_rate_TIMEOUT', '0.3333333333333333')
+    assertPointFieldValue(point, 'result_rate_CAR_TOO_LARGE', '0.3333333333333333')
     assertPointFieldValue(point, 'result_rate_ERROR_500', '0.3333333333333333')
 
     assertPointFieldValue(point, 'tasks_per_node_p5', '1i')

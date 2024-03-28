@@ -36,7 +36,7 @@ export type FraudAssesment =
 // When adding a new enum value, remember to update the summary initializer inside `reportRetrievalStats()`
 export type RetrievalResult =
   | 'OK'
-  | 'TIMEOUT'
+  | 'CAR_TOO_LARGE'
   | 'BAD_GATEWAY'
   | 'GATEWAY_TIMEOUT'
   | 'ERROR_500'
@@ -54,7 +54,7 @@ export interface Measurement {
   finished_at: number;
 
   status_code: number | undefined | null;
-  timeout: boolean;
+  car_too_large: boolean;
 }
 
 export interface GroupWinningStats {
