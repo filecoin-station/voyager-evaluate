@@ -21,10 +21,10 @@ describe('voyager-api client', () => {
     assert.strictEqual(retrievalTasks.length, 1000)
     assert.deepStrictEqual(retrievalTasks.slice(0, 2), [
       {
-        cid: '/ipfs/QmPVCuANEXcuaPeL4BRmEtW6ER4Y9pDgq9h6p4mVMTPkjb?format=car,3131'
+        cid: '/ipfs/QmRYoNskukBNN6LsR92cV4LazUJwwCkqs7tDJAKHfyFtCA/2699,1577'
       },
       {
-        cid: '/ipfs/QmRYoNskukBNN6LsR92cV4LazUJwwCkqs7tDJAKHfyFtCA/841,1573'
+        cid: '/ipfs/QmeFKv51P8sTCXa2wChuWTdnxnB8Z1UEUnkhyG4CGRih6V/1972,1260'
       }
     ])
   })
