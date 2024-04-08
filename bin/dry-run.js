@@ -103,7 +103,7 @@ await evaluate({
   logger: console,
   recordTelemetry,
 
-  // We don't want dry runs to update data in `sparks_stats`, therefore we are passing a stub
+  // We don't want dry runs to update data in `voyager_stats`, therefore we are passing a stub
   // connection factory that creates no-op clients. This also keeps the setup simpler. The person
   // executing a dry run does not need access to any Postgres instance.
   // Evaluate uses the PG client only for updating the statistics, it's not reading any data.
