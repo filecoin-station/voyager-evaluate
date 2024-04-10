@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/node'
-import { IE_CONTRACT_ADDRESS, RPC_URL, rpcHeaders } from '../lib/config.js'
+import { DATABASE_URL, IE_CONTRACT_ADDRESS, RPC_URL, rpcHeaders } from '../lib/config.js'
 import { startEvaluate } from '../index.js'
 import { fetchRoundDetails } from '../lib/voyager-api.js'
 import assert from 'node:assert'
@@ -9,6 +9,8 @@ import { newDelegatedEthAddress } from '@glif/filecoin-address'
 import { recordTelemetry } from '../lib/telemetry.js'
 import fs from 'node:fs/promises'
 import { fetchMeasurements } from '../lib/preprocess.js'
+import { migrateWithPgConfig } from '../lib/migrate.js'
+import pg from 'pg'
 
 const {
   SENTRY_ENVIRONMENT = 'development',
@@ -23,6 +25,8 @@ Sentry.init({
 })
 
 assert(WALLET_SEED, 'WALLET_SEED required')
+
+await migrateWithPgConfig({ connectionString: DATABASE_URL })
 
 const fetchRequest = new ethers.FetchRequest(RPC_URL)
 fetchRequest.setHeader('Authorization', rpcHeaders.Authorization || '')
@@ -49,6 +53,12 @@ const ieContract = new ethers.Contract(
 )
 const ieContractWithSigner = ieContract.connect(signer)
 
+const createPgClient = async () => {
+  const pgClient = new pg.Client({ connectionString: DATABASE_URL })
+  await pgClient.connect()
+  return pgClient
+}
+
 await startEvaluate({
   ieContract,
   ieContractWithSigner,
@@ -58,5 +68,6 @@ await startEvaluate({
   fetchMeasurements,
   fetchRoundDetails,
   recordTelemetry,
+  createPgClient,
   logger: console
 })

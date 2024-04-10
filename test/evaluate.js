@@ -2,10 +2,13 @@ import { MAX_SCORE, evaluate, runFraudDetection, MAX_SET_SCORES_PARTICIPANTS, cr
 import { Point } from '../lib/telemetry.js'
 import assert from 'node:assert'
 import createDebug from 'debug'
-import { VALID_MEASUREMENT, VALID_TASK } from './helpers/test-data.js'
+import { VALID_MEASUREMENT, VALID_TASK, today } from './helpers/test-data.js'
 import { assertPointFieldValue } from './helpers/assertions.js'
 import { RoundData } from '../lib/round.js'
+import { DATABASE_URL } from '../lib/config.js'
+import pg from 'pg'
 import { beforeEach } from 'mocha'
+import { migrateWithPgClient } from '../lib/migrate.js'
 
 const debug = createDebug('test')
 const logger = { log: debug, error: debug }
@@ -19,7 +22,27 @@ const recordTelemetry = (measurementName, fn) => {
 }
 beforeEach(() => telemetry.splice(0))
 
+const createPgClient = async () => {
+  const pgClient = new pg.Client({ connectionString: DATABASE_URL })
+  await pgClient.connect()
+  return pgClient
+}
+
 describe('evaluate', () => {
+  let pgClient
+  before(async () => {
+    pgClient = await createPgClient()
+    await migrateWithPgClient(pgClient)
+  })
+
+  beforeEach(async () => {
+    await pgClient.query('DELETE FROM retrieval_stats')
+  })
+
+  after(async () => {
+    await pgClient.end()
+  })
+
   it('evaluates measurements', async () => {
     const round = new RoundData(0)
     for (let i = 0; i < 10; i++) {
@@ -42,6 +65,7 @@ describe('evaluate', () => {
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
+      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -58,6 +82,13 @@ describe('evaluate', () => {
       `No telemetry point "evaluate" was recorded. Actual points: ${JSON.stringify(telemetry.map(p => p.name))}`)
     assertPointFieldValue(point, 'total_nodes', '1i')
     // TODO: assert more point fields
+
+    const { rows: publicStats } = await pgClient.query('SELECT * FROM retrieval_stats')
+    assert.deepStrictEqual(publicStats, [{
+      day: today(),
+      total: 1,
+      successful: 1
+    }])
   })
 
   it('handles empty rounds', async () => {
@@ -79,6 +110,7 @@ describe('evaluate', () => {
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
+      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -130,6 +162,7 @@ describe('evaluate', () => {
       ieContractWithSigner,
       fetchRoundDetails,
       recordTelemetry,
+      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -170,6 +203,7 @@ describe('evaluate', () => {
       ieContractWithSigner,
       recordTelemetry,
       fetchRoundDetails,
+      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -218,6 +252,7 @@ describe('evaluate', () => {
       ieContractWithSigner,
       recordTelemetry,
       fetchRoundDetails,
+      createPgClient,
       logger
     })
     assert.strictEqual(setScoresCalls.length, 1)
@@ -257,6 +292,7 @@ describe('evaluate', () => {
       ieContractWithSigner,
       recordTelemetry,
       fetchRoundDetails,
+      createPgClient,
       logger
     })
 

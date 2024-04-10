@@ -1,7 +1,10 @@
 // import createDebug from 'debug'
 // import { beforeEach } from 'mocha'
 // import assert from 'node:assert'
+// import pg from 'pg'
+// import { DATABASE_URL } from '../lib/config.js'
 // import { evaluate } from '../lib/evaluate.js'
+// import { migrateWithPgClient } from '../lib/migrate.js'
 // import { fetchMeasurements, preprocess } from '../lib/preprocess.js'
 // import { RoundData } from '../lib/round.js'
 // import { fetchRoundDetails } from '../lib/voyager-api.js'
@@ -35,7 +38,27 @@
 //   }
 // })
 
+// const createPgClient = async () => {
+//   const pgClient = new pg.Client({ connectionString: DATABASE_URL })
+//   await pgClient.connect()
+//   return pgClient
+// }
+
 describe('preprocess-evaluate integration', () => {
+  // let pgClient
+  // before(async () => {
+  //   pgClient = await createPgClient()
+  //   await migrateWithPgClient(pgClient)
+  // })
+
+  // beforeEach(async () => {
+  //   await pgClient.query('DELETE FROM retrieval_stats')
+  // })
+
+  // after(async () => {
+  //   await pgClient.end()
+  // })
+
   // TODO: Need existing round with measurements
   it('produces expected results' /*, async function () {
     this.timeout(10000)
@@ -57,6 +80,7 @@ describe('preprocess-evaluate integration', () => {
 
     const ieContractWithSigner = createIeContractWithSigner(MERIDIAN_VERSION)
     await evaluate({
+      createPgClient,
       fetchRoundDetails,
       ieContractWithSigner,
       logger,

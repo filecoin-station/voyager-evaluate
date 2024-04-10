@@ -66,3 +66,5 @@ export interface GroupWinningStats {
 export interface FraudDetectionStats {
   groupWinning: GroupWinningStats
 }
+
+export type CreatePgClient = () => Promise<import('pg').Client>;
